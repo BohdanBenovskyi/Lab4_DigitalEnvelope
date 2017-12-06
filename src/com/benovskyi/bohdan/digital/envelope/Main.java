@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import javax.swing.*;
@@ -138,7 +139,37 @@ public class Main extends JFrame {
                  }
              }
              if(e.getActionCommand().equals("Почати дешифрування")) {
-            	 
+            	 ObjectInputStream inputStream = null;
+
+                 //decrypt session key
+                 try {
+                     inputStream = new ObjectInputStream(new FileInputStream(RSAUtil.PRIVATE_KEY_FILE));
+                     final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
+                     decrKey = RSAUtil.decrypt(cipherSessionKey, privateKey);
+
+                 } catch (IOException | ClassNotFoundException e1) {
+                     e1.printStackTrace();
+                 }
+
+                 //decrypt message
+                 CAST128Util cast128 = new CAST128Util();
+                 try {
+                     decrMessage = cast128.decoding(encryptMessage ,decrKey);
+                     txtMsgDecrypted.setText(decrMessage);
+                 } catch (UnsupportedEncodingException e1) {
+                     e1.printStackTrace();
+                 }
+
+                 //decrypt hash
+                 try {
+                     inputStream = new ObjectInputStream(new FileInputStream(RSAUtil.PRIVATE_KEY_FILE));
+                     final PrivateKey privateKey = (PrivateKey) inputStream.readObject();
+                     String decrHash = RSAUtil.decrypt(cipherHash, privateKey);
+                     txtHash2.setText(decrHash);
+
+                 } catch (IOException | ClassNotFoundException e1) {
+                     e1.printStackTrace();
+                 }
              }
         }
    }
