@@ -77,13 +77,13 @@ public class Main extends JFrame {
 	public class TestActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
              if(e.getActionCommand().equals("Згенерувати ключ")) {
-            	 System.out.println("Кнопка #1");
+            	 
              }
              if(e.getActionCommand().equals("Почати шифрування")) {
-            	 System.out.println("Кнопка #2");
+            	 
              }
              if(e.getActionCommand().equals("Почати дешифрування")) {
-            	 System.out.println("Кнопка #3");
+            	 
              }
         }
    }
