@@ -37,11 +37,11 @@ public class Main extends JFrame {
 	
 	public Main() {
 	    super("Лабораторна №4 - цифровий конверт");
-	    this.setBounds(100,100,600,250);
+	    this.setBounds(100,100,400,250);
 	    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 	    Container container = this.getContentPane();
-	    container.setLayout(new GridLayout(8,2));
+	    container.setLayout(new GridLayout(8,2, 5, 5));
 	    container.add(lblMsg);
 	    container.add(txtMsg);
 
@@ -65,7 +65,28 @@ public class Main extends JFrame {
 	    
 	    container.add(lblHash2);
 	    container.add(txtHash2);
+	    
+	    ActionListener actionListener = new TestActionListener();
+        
+	    btnGenKey.addActionListener(actionListener);
+	    btnBeginEncrypt.addActionListener(actionListener);
+	    btnBeginDecrypt.addActionListener(actionListener);
+	    
 	}
+	
+	public class TestActionListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+             if(e.getActionCommand().equals("Згенерувати ключ")) {
+            	 System.out.println("Кнопка #1");
+             }
+             if(e.getActionCommand().equals("Почати шифрування")) {
+            	 System.out.println("Кнопка #2");
+             }
+             if(e.getActionCommand().equals("Почати дешифрування")) {
+            	 System.out.println("Кнопка #3");
+             }
+        }
+   }
 	
 	public static void main(String[] args) {
 		Main app = new Main();
