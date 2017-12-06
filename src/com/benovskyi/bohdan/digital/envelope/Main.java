@@ -2,6 +2,12 @@ package com.benovskyi.bohdan.digital.envelope;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
+
 import javax.swing.*;
 
 public class Main extends JFrame {
@@ -30,14 +36,21 @@ public class Main extends JFrame {
 	private JTextField txtHash1 = new JTextField("");
 	private JTextField txtHash2 = new JTextField("");
 	
-	private JButton btnGenKey = new JButton("Згенерувати ключ");
+	private JButton btnGenKey = new JButton("Генерація сеансових ключів");
 	private JButton btnBeginEncrypt = new JButton("Почати шифрування");
 	private JButton btnBeginDecrypt = new JButton("Почати дешифрування");
+	
+	private int sessionKey = 0;
+    private int [] encryptMessage;
+    private byte[] cipherSessionKey;
+    private String decrMessage;
+    String decrKey;
+    byte[] cipherHash;
 	
 	
 	public Main() {
 	    super("Лабораторна №4 - цифровий конверт");
-	    this.setBounds(100,100,400,250);
+	    this.setBounds(100,100,600,250);
 	    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 	    Container container = this.getContentPane();
@@ -76,11 +89,53 @@ public class Main extends JFrame {
 	
 	public class TestActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-             if(e.getActionCommand().equals("Згенерувати ключ")) {
-            	 
+             if(e.getActionCommand().equals("Генерація сеансових ключів")) {
+            	 LFSRUtil lfsr = new LFSRUtil("01101000010", 8);
+                 sessionKey = lfsr.generate(8);
              }
              if(e.getActionCommand().equals("Почати шифрування")) {
-            	 
+            	//generate public and private key using rsa
+                 if (!RSAUtil.areKeysPresent()) {
+                     RSAUtil.generateKey();
+                 }
+
+                 //get public key
+                 ObjectInputStream inputStream = null;
+                 try {
+                     //encrypt session key
+                     inputStream = new ObjectInputStream(new FileInputStream(RSAUtil.PUBLIC_KEY_FILE));
+                     final PublicKey publicKey = (PublicKey) inputStream.readObject();
+                     cipherSessionKey = RSAUtil.encrypt(Integer.toString(sessionKey), publicKey);
+                     txtEncrKey.setText(String.valueOf(cipherSessionKey));
+                 } catch (IOException | ClassNotFoundException e1) {
+                     e1.printStackTrace();
+                 }
+                 
+               //encrypt message
+                 CAST128Util cast128 = new CAST128Util();
+                 try {
+                     encryptMessage = cast128.encoding(txtMsg.getText(), Integer.toString(sessionKey));
+                     txtEncrMsg.setText(String.valueOf(encryptMessage));
+                     //encryptedMessage.setText(CAST128Util.encodedMessageInString);
+                 } catch (UnsupportedEncodingException e1) {
+                     e1.printStackTrace();
+                 }
+
+                 //calculate hash
+                 SHA1Util sha1 = new SHA1Util();
+                 byte[] dataBuffer = (txtMsg.getText()).getBytes();
+                 String digest = sha1.digest(dataBuffer);
+                 txtHash1.setText(digest);
+
+                 //encrypt digital signature
+                 try {
+                     inputStream = new ObjectInputStream(new FileInputStream(RSAUtil.PUBLIC_KEY_FILE));
+                     final PublicKey publicKey = (PublicKey) inputStream.readObject();
+                     cipherHash = RSAUtil.encrypt(digest, publicKey);
+                     txtDS.setText(String.valueOf(cipherHash));
+                 } catch (IOException | ClassNotFoundException e1) {
+                     e1.printStackTrace();
+                 }
              }
              if(e.getActionCommand().equals("Почати дешифрування")) {
             	 
